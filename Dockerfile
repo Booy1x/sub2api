@@ -25,10 +25,13 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Install dependencies first (better caching)
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Copy frontend source and build
 COPY frontend/ ./
+# Approve and run build scripts for esbuild (needed for native binary)
+RUN pnpm approve-builds esbuild vue-demi 2>/dev/null || true
+RUN pnpm rebuild esbuild 2>/dev/null || true
 RUN pnpm run build
 
 # -----------------------------------------------------------------------------
